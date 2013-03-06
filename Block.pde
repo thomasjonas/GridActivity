@@ -1,9 +1,9 @@
 class Block {
-  int x, y, width, height;
+  int x, y, width, height, lastMovement, pastCount, pastViews;
   ArrayList<PImage> pastImages;
   PImage old;
-  PImage update;
-  boolean different;
+  boolean different, showPast;
+
   Block(int x, int y, int width, int height) {
     this.x = x;
     this.y = y;
@@ -11,7 +11,8 @@ class Block {
     this.height = height;
     pastImages = new ArrayList<PImage>();
     old = createImage(width, height, RGB);
-    different = false;
+    different = showPast = false;
+    lastMovement = pastCount = pastViews = 0;
   }
 
   void updateImage(PImage img) {
@@ -37,7 +38,37 @@ class Block {
         old.pixels[num] = newPixel;
       }
     }
-    old.updatePixels();    
+    old.updatePixels();
+    //    if(different) {
+    //      showPastImage();  
+    //    }
+    lastMovement++;
+
+    if (different && lastMovement > 300) {
+      pastImages.add(img.get(this.x, this.y, this.width, this.height));
+      lastMovement = 0;
+    }
+  }
+
+  void showPastImage() {
+    if (pastImages.size() > 0 && showPast) {
+      PImage pastImage = pastImages.get(pastCount);
+      image(pastImage, this.x, this.y);
+      pastViews++;
+
+      if (pastViews > 30) {
+        pastViews = 0;
+        pastCount++;
+        showPast = false;
+        if (pastCount >= pastImages.size()) pastCount = 0;
+      }
+    }
+  }
+  
+  void reset() {
+    different = showPast = false;
+    lastMovement = pastCount = pastViews = 0;
+    pastImages.clear();
   }
 }
 
